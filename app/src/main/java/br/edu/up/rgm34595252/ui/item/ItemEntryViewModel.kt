@@ -85,7 +85,7 @@ fun ItemDetails.toItem(): Item = Item(
 )
 
 fun Item.formatedPrice(): String {
-    return NumberFormat.getCurrencyInstance().format(price)
+    return "R$ %.2f".format(this.price)
 }
 
 /**

@@ -40,14 +40,14 @@ class ItemDetailsViewModel(
 
     val uiState: StateFlow<ItemDetailsUiState> =
         itemsRepository.getItemStream(itemId)
-            .filterNotNull() // Ignorar valores nulos
+            .filterNotNull()
             .map { item ->
                 ItemDetailsUiState(
                     outOfStock = item.quantity == 0,
                     itemDetails = ItemDetails(
                         id = item.id,
                         name = item.name,
-                        price = item.formatedPrice(),
+                        price = item.price.toString(),
                         quantity = item.quantity.toString()
                     )
                 )
