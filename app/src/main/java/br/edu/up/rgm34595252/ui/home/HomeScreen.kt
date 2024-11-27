@@ -39,6 +39,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import br.edu.up.rgm34595252.InventoryTopAppBar
 import br.edu.up.rgm34595252.R
 import br.edu.up.rgm34595252.data.Item
+import br.edu.up.rgm34595252.ui.AppViewModelProvider
 import br.edu.up.rgm34595252.ui.item.formatedPrice
 import br.edu.up.rgm34595252.ui.navigation.NavigationDestination
 import br.edu.up.rgm34595252.ui.theme.InventoryTheme
@@ -67,8 +69,11 @@ object HomeDestination : NavigationDestination {
 fun HomeScreen(
     navigateToItemEntry: () -> Unit,
     navigateToItemUpdate: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val uiState = viewModel.uiState.collectAsState()
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -94,13 +99,14 @@ fun HomeScreen(
         },
     ) { innerPadding ->
         HomeBody(
-            itemList = listOf(),
+            itemList = uiState.value.itemList,
             onItemClick = navigateToItemUpdate,
             modifier = modifier.fillMaxSize(),
             contentPadding = innerPadding,
         )
     }
 }
+
 
 @Composable
 private fun HomeBody(
