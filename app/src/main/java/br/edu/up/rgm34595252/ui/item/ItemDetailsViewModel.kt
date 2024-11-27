@@ -18,19 +18,54 @@ package br.edu.up.rgm34595252.ui.item
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import br.edu.up.rgm34595252.data.Item
 import br.edu.up.rgm34595252.data.ItemsRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * ViewModel to retrieve, update and delete an item from the [ItemsRepository]'s data source.
  */
 class ItemDetailsViewModel(
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val itemsRepository: ItemsRepository
 ) : ViewModel() {
 
     private val itemId: Int = checkNotNull(savedStateHandle[ItemDetailsDestination.itemIdArg])
 
-    companion object {
-        private const val TIMEOUT_MILLIS = 5_000L
+    val uiState: StateFlow<ItemDetailsUiState> =
+        itemsRepository.getItemStream(itemId)
+            .filterNotNull() // Ignorar valores nulos
+            .map { item ->
+                ItemDetailsUiState(
+                    outOfStock = item.quantity == 0,
+                    itemDetails = ItemDetails(
+                        id = item.id,
+                        name = item.name,
+                        price = item.formatedPrice(),
+                        quantity = item.quantity.toString()
+                    )
+                )
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = ItemDetailsUiState()
+            )
+
+    suspend fun deleteItem() {
+        itemsRepository.deleteItem(Item(itemId, "", 0.0, 0)) // Dados genéricos para excluir pelo ID
+    }
+
+    suspend fun sellItem() {
+        val currentItem = itemsRepository.getItemStream(itemId).firstOrNull() ?: return
+        if (currentItem.quantity > 0) {
+            itemsRepository.updateItem(currentItem.copy(quantity = currentItem.quantity - 1))
+        }
     }
 }
 
@@ -41,3 +76,4 @@ data class ItemDetailsUiState(
     val outOfStock: Boolean = true,
     val itemDetails: ItemDetails = ItemDetails()
 )
+

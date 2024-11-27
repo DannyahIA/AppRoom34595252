@@ -18,15 +18,18 @@ package br.edu.up.rgm34595252.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import br.edu.up.rgm34595252.ui.AppViewModelProvider
 import br.edu.up.rgm34595252.ui.home.HomeDestination
 import br.edu.up.rgm34595252.ui.home.HomeScreen
 import br.edu.up.rgm34595252.ui.item.ItemDetailsDestination
 import br.edu.up.rgm34595252.ui.item.ItemDetailsScreen
+import br.edu.up.rgm34595252.ui.item.ItemDetailsViewModel
 import br.edu.up.rgm34595252.ui.item.ItemEditDestination
 import br.edu.up.rgm34595252.ui.item.ItemEditScreen
 import br.edu.up.rgm34595252.ui.item.ItemEntryDestination
@@ -64,8 +67,13 @@ fun InventoryNavHost(
             arguments = listOf(navArgument(ItemDetailsDestination.itemIdArg) {
                 type = NavType.IntType
             })
-        ) {
+        ) { backStackEntry ->
+            val viewModel: ItemDetailsViewModel = viewModel(
+                factory = AppViewModelProvider.Factory,
+                key = "ItemDetailsViewModel_${backStackEntry.arguments?.getInt(ItemDetailsDestination.itemIdArg)}"
+            )
             ItemDetailsScreen(
+                viewModel = viewModel,
                 navigateToEditItem = { navController.navigate("${ItemEditDestination.route}/$it") },
                 navigateBack = { navController.navigateUp() }
             )

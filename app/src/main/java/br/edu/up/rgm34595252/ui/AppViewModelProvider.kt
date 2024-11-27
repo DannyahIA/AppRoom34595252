@@ -18,6 +18,7 @@ package br.edu.up.rgm34595252.ui
 
 import android.app.Application
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
@@ -46,8 +47,11 @@ object AppViewModelProvider {
 
         // Initializer for ItemDetailsViewModel
         initializer {
+            val application = this[APPLICATION_KEY] as InventoryApplication
+            val savedStateHandle = this.createSavedStateHandle()
             ItemDetailsViewModel(
-                this.createSavedStateHandle()
+                savedStateHandle = savedStateHandle,
+                itemsRepository = application.container.itemsRepository
             )
         }
 
